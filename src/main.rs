@@ -302,7 +302,7 @@ fn extract_code(stream: &mut std::net::TcpStream) -> Result<String, String> {
     // First line: "GET /?code=M.xxx&session_state=yyy HTTP/1.1"
     let first_line = text.lines().next().unwrap_or("");
     let path = first_line.split_whitespace().nth(1).unwrap_or("");
-    let query = path.splitn(2, '?').nth(1).unwrap_or("");
+    let query = path.split_once('?').map(|x| x.1).unwrap_or("");
 
     for pair in query.split('&') {
         let Some((key, val)) = pair.split_once('=') else {
