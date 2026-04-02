@@ -1,5 +1,9 @@
 # clipygo-plugin-msteams
 
+[![Build](https://github.com/it-atelier-gn/clipygo-plugin-msteams/actions/workflows/ci.yml/badge.svg)](https://github.com/it-atelier-gn/clipygo-plugin-msteams/actions)
+[![Rust](https://img.shields.io/badge/rust-1.80%2B-orange?logo=rust)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A Microsoft Teams target provider plugin for [clipygo](https://github.com/it-atelier-gn/clipygo).
 
 ## What it does
