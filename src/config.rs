@@ -1,23 +1,17 @@
 use serde::{Deserialize, Serialize};
 
-/// Stored at:
-///   Windows : %APPDATA%\clipygo-plugin-msteams\config.json
-///   macOS   : ~/Library/Application Support/clipygo-plugin-msteams/config.json
-///   Linux   : ~/.config/clipygo-plugin-msteams/config.json
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct Config {
     #[serde(default)]
     pub tenant_id: String,
     #[serde(default)]
     pub client_id: String,
-    /// "oauth2" (default), "password", or "device_code"
     #[serde(default = "default_auth_method")]
     pub auth_method: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub password: Option<String>,
-    // Cached tokens — written back automatically
     #[serde(skip_serializing_if = "Option::is_none")]
     pub access_token: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -31,11 +25,27 @@ fn default_auth_method() -> String {
 }
 
 pub fn config_path() -> std::path::PathBuf {
-    let dir = dirs::config_dir()
-        .unwrap_or_else(|| std::path::PathBuf::from("."))
-        .join("clipygo-plugin-msteams");
+    let dir = config_dir();
     let _ = std::fs::create_dir_all(&dir);
     dir.join("config.json")
+}
+
+#[cfg(not(test))]
+fn config_dir() -> std::path::PathBuf {
+    dirs::config_dir()
+        .unwrap_or_else(|| std::path::PathBuf::from("."))
+        .join("clipygo-plugin-msteams")
+}
+
+#[cfg(test)]
+fn config_dir() -> std::path::PathBuf {
+    std::env::temp_dir()
+        .join("clipygo-plugin-msteams-tests")
+        .join(format!(
+            "{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ))
 }
 
 pub fn load_config() -> Config {
@@ -48,5 +58,23 @@ pub fn load_config() -> Config {
 pub fn save_config(config: &Config) {
     if let Ok(data) = serde_json::to_string_pretty(config) {
         let _ = std::fs::write(config_path(), data);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn config_path_stays_out_of_user_config_dir() {
+        if let Some(real) = dirs::config_dir() {
+            assert!(!config_path().starts_with(real.join("clipygo-plugin-msteams")));
+        }
+    }
+
+    #[test]
+    fn config_path_differs_per_thread() {
+        let other = std::thread::spawn(config_path).join().unwrap();
+        assert_ne!(config_path(), other);
     }
 }
