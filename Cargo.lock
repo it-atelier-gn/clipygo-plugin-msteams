@@ -67,7 +67,7 @@ dependencies = [
 
 [[package]]
 name = "clipygo-plugin-msteams"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "dirs",
  "reqwest",
